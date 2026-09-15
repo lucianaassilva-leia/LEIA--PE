@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projeto LEIA — Painel Institucional</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #5C2233;
+    --navy-deep: #3E1723;
+    --gold: #8A8D74;
+    --gold-bright: #5C2233;
+    --paper: #F5F0E6;
+    --paper-2: #ECE3D0;
+    --ink: #1D1B18;
+    --ink-soft: #6B6D60;
+    --line: rgba(92,34,51,0.18);
+    --card-bg: #FBF8F0;
+    --on-accent: #FBF8F0;
+  }
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {
+      --navy: #B85A78; --navy-deep: #7A2E45; --gold: #A3A68E; --gold-bright: #B85A78;
+      --paper: #17130F; --paper-2: #1F1A15; --ink: #ECE6D8; --ink-soft: #B4AFA0;
+      --line: rgba(184,90,120,0.28); --card-bg: #1D1712; --on-accent: #FBF8F0;
+    }
+  }
+  :root[data-theme="dark"] {
+    --navy: #B85A78; --navy-deep: #7A2E45; --gold: #A3A68E; --gold-bright: #B85A78;
+    --paper: #17130F; --paper-2: #1F1A15; --ink: #ECE6D8; --ink-soft: #B4AFA0;
+    --line: rgba(184,90,120,0.28); --card-bg: #1D1712; --on-accent: #FBF8F0;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  a { color: var(--navy); }
+  h1, h2, h3 { font-family: 'Fraunces', Georgia, 'Times New Roman', serif; margin: 0; }
+  .skip-link { position: absolute; left: -999px; top: 0; background: var(--navy-deep); color: #fff; padding: 0.6rem 1rem; z-index: 100; }
+  .skip-link:focus { left: 1rem; top: 1rem; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 1.5rem; }
+
+  header.site-nav {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--paper); color: var(--ink);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-row { max-width: 880px; margin: 0 auto; padding: 0.9rem 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.8rem; }
+  .brand { font-family: 'Fraunces', serif; font-weight: 700; font-size: 1.05rem; color: var(--ink); display: flex; align-items: center; gap: 0.5rem; }
+  .brand::before { content: '📖'; font-size: 1.2rem; }
+  .brand span { color: var(--ink-soft); font-family: 'Public Sans', sans-serif; font-weight: 500; font-size: 0.76rem; display: block; margin-top: 0.1rem; }
+  nav.links { display: flex; gap: 1.3rem; flex-wrap: wrap; }
+  nav.links a { color: var(--ink-soft); text-decoration: none; font-size: 0.92rem; }
+  nav.links a:hover { color: var(--navy); }
+  .theme-toggle { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: none; cursor: pointer; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; color: var(--ink-soft); }
+  .nav-cta { background: var(--navy); color: var(--on-accent); padding: 0.55rem 1.1rem; border-radius: 4px; text-decoration: none; font-weight: 600; font-size: 0.88rem; }
+
+  section.hero { position: relative; padding: 4rem 0 3rem; border-bottom: 1px solid var(--line); overflow: hidden; }
+  .hero-deco { position: absolute; inset: 0; pointer-events: none; z-index: 0; opacity: 0.55; }
+  .hero-deco svg { width: 100%; height: 100%; }
+  section.hero .wrap { position: relative; z-index: 1; }
+  .eyebrow { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--navy); font-weight: 700; margin-bottom: 0.9rem; }
+  .eyebrow::before { content: '— '; }
+  h1.hero-title { font-size: clamp(2rem, 5vw, 2.9rem); font-weight: 600; max-width: 18ch; }
+  .accent-word { color: var(--navy); font-style: italic; }
+  p.hero-sub { max-width: 60ch; color: var(--ink-soft); font-size: 1.08rem; margin-top: 1.1rem; }
+  .hero-ctas { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1.6rem; }
+  .btn-primary { background: var(--navy); color: var(--on-accent); padding: 0.75rem 1.4rem; border-radius: 4px; text-decoration: none; font-weight: 600; font-size: 0.92rem; }
+  .btn-secondary { border: 1px solid var(--navy); color: var(--navy); padding: 0.73rem 1.4rem; border-radius: 3px; text-decoration: none; font-weight: 600; font-size: 0.92rem; }
+
+  .info-strip { display: flex; flex-wrap: wrap; margin-top: 2.6rem; border-top: 1px solid var(--line); }
+  .info-item { flex: 1 1 220px; padding: 1.1rem 1.4rem 0.2rem 0; }
+  .info-item h4 { font-size: 0.74rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--gold); margin-bottom: 0.4rem; }
+  .info-item p { margin: 0; font-size: 0.9rem; color: var(--ink-soft); }
+
+  .quote-block { margin: 2.4rem 0 0; padding: 1.3rem 1.5rem; border-left: 3px solid var(--gold-bright); background: var(--card-bg); font-size: 1rem; color: var(--ink-soft); font-style: italic; }
+  .quote-block cite { display: block; margin-top: 0.5rem; font-style: normal; font-size: 0.84rem; color: var(--ink-soft); }
+
+  section { padding: 3.4rem 0; }
+  section#fundamentacao { border-bottom: 1px solid var(--line); }
+  h2.section-title { font-size: 1.7rem; font-weight: 600; max-width: 24ch; }
+  p.section-lead { color: var(--ink-soft); max-width: 62ch; margin-top: 0.8rem; font-size: 1rem; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.4rem; }
+  .tag { border: 1px solid var(--line); padding: 0.35rem 0.8rem; border-radius: 3px; font-size: 0.85rem; color: var(--navy); }
+
+  section#ecossistema { border-bottom: 1px solid var(--line); }
+  .front-grid { display: grid; grid-template-columns: 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); margin-top: 2rem; }
+  .front { background: var(--card-bg); padding: 1.5rem 1.6rem; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; align-items: flex-start; }
+  .front-main { flex: 1 1 320px; }
+  .front-role { font-size: 0.78rem; color: var(--gold); font-weight: 600; margin-bottom: 0.4rem; }
+  .front h3 { font-size: 1.15rem; font-weight: 600; margin-bottom: 0.45rem; }
+  .front p { margin: 0; font-size: 0.92rem; color: var(--ink-soft); max-width: 52ch; }
+  .front-status { flex: none; font-size: 0.82rem; color: var(--ink-soft); text-align: right; }
+  .front-status a { display: inline-block; margin-top: 0.3rem; font-weight: 600; color: var(--navy); }
+
+  section#painel-acesso { border-bottom: 1px solid var(--line); }
+  .access-box { background: var(--card-bg); border: 1px solid var(--line); padding: 2rem; margin-top: 1.6rem; }
+  .field { margin-bottom: 1.1rem; }
+  .field label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem; }
+  .field input { width: 100%; padding: 0.65rem 0.8rem; border: 1px solid var(--line); border-radius: 3px; background: var(--paper); color: var(--ink); font-family: inherit; font-size: 0.95rem; }
+  .consent { font-size: 0.8rem; color: var(--ink-soft); display: flex; gap: 0.6rem; align-items: flex-start; margin: 1.2rem 0 1.4rem; }
+  .consent input { margin-top: 0.2rem; }
+  .unlock-btn { background: var(--navy); color: var(--on-accent); border: none; padding: 0.75rem 1.4rem; border-radius: 4px; font-weight: 600; font-size: 0.92rem; cursor: pointer; }
+  .unlock-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .agent-links { display: none; margin-top: 1.6rem; padding-top: 1.6rem; border-top: 1px solid var(--line); gap: 1rem; flex-wrap: wrap; }
+  .agent-links.shown { display: flex; }
+  .agent-link { flex: 1 1 240px; border: 1px solid var(--line); padding: 1.1rem 1.2rem; text-decoration: none; color: var(--ink); background: var(--paper); }
+  .agent-link strong { display: block; color: var(--navy); font-size: 0.98rem; }
+  .agent-link span { font-size: 0.84rem; color: var(--ink-soft); }
+  .how-steps { list-style: none; margin: 1.8rem 0 0; padding: 0; counter-reset: step; }
+  .how-steps li { counter-increment: step; padding: 0.6rem 0; font-size: 0.9rem; color: var(--ink-soft); display: flex; gap: 0.8rem; }
+  .how-steps li::before { content: counter(step); flex: none; width: 22px; height: 22px; border: 1px solid var(--navy); color: var(--navy); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; }
+  .lgpd-note { font-size: 0.82rem; color: var(--ink-soft); margin-top: 1.6rem; max-width: 62ch; }
+
+  .author-card { display: flex; align-items: center; gap: 0.9rem; margin-top: 1.8rem; }
+  .avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--navy); color: var(--on-accent); display: flex; align-items: center; justify-content: center; font-weight: 600; font-family: 'Fraunces', serif; flex: none; }
+  .author-card div strong { display: block; font-size: 0.96rem; }
+  .author-card div span { font-size: 0.84rem; color: var(--ink-soft); }
+
+  section#autoria { border-bottom: 1px solid var(--line); }
+  section#autoria p { max-width: 66ch; color: var(--ink-soft); margin-top: 1rem; font-size: 0.96rem; }
+
+  .profile-grid { display: grid; grid-template-columns: 1fr; gap: 2rem; margin-top: 1.8rem; }
+  @media (min-width: 640px) { .profile-grid { grid-template-columns: 1.3fr 1fr; } }
+  .profile-bio p { margin: 0 0 1rem; font-size: 0.95rem; color: var(--ink-soft); }
+  .lattes-btn { display: inline-block; margin-top: 0.4rem; border: 1px solid var(--navy); color: var(--navy); padding: 0.6rem 1.1rem; border-radius: 3px; text-decoration: none; font-size: 0.88rem; font-weight: 600; }
+  .contact-row { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 0.4rem; }
+  .contact-row .lattes-btn { margin-top: 0; }
+  .whatsapp-btn { display: inline-block; background: var(--navy); color: var(--on-accent); padding: 0.6rem 1.1rem; border-radius: 3px; text-decoration: none; font-size: 0.88rem; font-weight: 600; }
+  .footer-links { display: flex; gap: 1.2rem; margin-top: 0.6rem; }
+  .footer-links a { font-size: 0.8rem; color: var(--ink-soft); text-decoration: none; font-weight: 600; }
+  .footer-links a:hover { color: var(--navy); }
+  .side-block { margin-bottom: 1.4rem; }
+  .side-block h4 { font-size: 0.82rem; font-weight: 600; color: var(--navy); margin-bottom: 0.5rem; }
+  .side-block ul { list-style: none; margin: 0; padding: 0; }
+  .side-block li { font-size: 0.88rem; padding: 0.4rem 0; border-bottom: 1px solid var(--line); }
+  .side-block li em { display: block; font-style: normal; color: var(--ink-soft); font-size: 0.8rem; }
+
+  footer { padding: 2.2rem 0 3rem; }
+  footer p { font-size: 0.8rem; color: var(--ink-soft); margin: 0.3rem 0; }
+</style>
+</head>
+<body>
+<a href="#conteudo" class="skip-link">Pular para o conteúdo</a>
+
+<header class="site-nav">
+  <div class="nav-row">
+    <div class="brand">Projeto LEIA<span>Leitura · Escrita · Inteligência Artificial</span></div>
+    <nav class="links">
+      <a href="#ecossistema">Ecossistema</a>
+      <a href="#painel-acesso">Painel de acesso</a>
+      <a href="#autoria">Autoria</a>
+      <a href="#perfil">Perfil profissional</a>
+    </nav>
+    <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema claro/escuro" type="button">🌙</button>
+    <a class="nav-cta" href="#painel-acesso">Acessar o painel</a>
+  </div>
+</header>
+
+<main id="conteudo">
+  <section class="hero">
+    <div class="hero-deco" aria-hidden="true">
+      <svg viewBox="0 0 900 420" preserveAspectRatio="none">
+        <path d="M100 260 Q 480 60 850 260" stroke="var(--line)" stroke-width="1" fill="none"/>
+        <path d="M100 260 Q 480 460 850 260" stroke="var(--line)" stroke-width="1" fill="none"/>
+      </svg>
+    </div>
+    <div class="wrap">
+      <div class="eyebrow">Painel institucional · Projeto LEIA</div>
+      <h1 class="hero-title">Um ecossistema de <span class="accent-word">leitura</span> conduzido por inteligência artificial</h1>
+      <p class="hero-sub">Cinco frentes integradas — orquestração, apoio pedagógico escolar, comunicação institucional, ambiente virtual de turmas e curadoria bibliotecária — desenhadas para formar leitores e apoiar equipes escolares com autonomia, mediação e método.</p>
+      <div class="hero-ctas">
+        <a class="btn-primary" href="#painel-acesso">Acessar o painel</a>
+        <a class="btn-secondary" href="#ecossistema">Conhecer o ecossistema</a>
+      </div>
+
+      <div class="info-strip">
+        <div class="info-item">
+          <h4>Autoria e coordenação</h4>
+          <p>Luciana Sales — idealização do projeto e dos agentes de IA</p>
+        </div>
+        <div class="info-item">
+          <h4>Referenciais teóricos</h4>
+          <p>Freire · Piaget · Vygotsky — Perrenoud e Morin, reforma do pensamento</p>
+        </div>
+        <div class="info-item">
+          <h4>Escopo</h4>
+          <p>5 frentes integradas — orquestração, escolas, comunicação, turmas e biblioteca</p>
+        </div>
+      </div>
+
+      <div class="quote-block">
+        Para Edgar Morin, o mais importante não é acumular conhecimento, mas desenvolver a aptidão para formular e enfrentar problemas diante da incerteza.
+        <cite>Ideia de Edgar Morin, em "A Cabeça Bem-Feita"</cite>
+      </div>
+    </div>
+  </section>
+
+  <section id="fundamentacao">
+    <div class="wrap">
+      <div class="eyebrow">Fundamentação pedagógica</div>
+      <h2 class="section-title">A tecnologia serve à formação de leitores, não o contrário</h2>
+      <p class="section-lead">O Projeto LEIA parte de um pressuposto simples e exigente: a inteligência artificial só tem lugar na escola quando serve à formação de leitores autônomos e críticos, não quando substitui a mediação humana. Por isso, cada agente do ecossistema é orientado por princípios já consolidados na tradição pedagógica — a leitura como ato de consciência, em Paulo Freire; a construção ativa do conhecimento, em Piaget e Vygotsky; e a religação de saberes proposta por Edgar Morin, para quem educar é ensinar a enfrentar a incerteza e pensar de forma contextualizada.</p>
+      <p class="section-lead">A essa base soma-se a noção de competência de Philippe Perrenoud: mobilizar conhecimentos diante de situações reais. É esse conjunto de referenciais — e não apenas a tecnologia — que orienta o desenho de cada agente apresentado a seguir.</p>
+      <div class="tag-row">
+        <span class="tag">Paulo Freire</span>
+        <span class="tag">Jean Piaget</span>
+        <span class="tag">Lev Vygotsky</span>
+        <span class="tag">Philippe Perrenoud</span>
+        <span class="tag">Edgar Morin</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="ecossistema">
+    <div class="wrap">
+      <div class="eyebrow">O ecossistema</div>
+      <h2 class="section-title">Cinco frentes, uma única arquitetura pedagógica</h2>
+      <p class="section-lead">Cada frente cumpre uma função específica dentro do Projeto LEIA. Duas delas — LEIA Escolar e Bibliotecar-LEIA — são acessadas mediante identificação no painel abaixo.</p>
+
+      <div class="front-grid">
+        <div class="front">
+          <div class="front-main">
+            <div class="front-role">Camada de coordenação</div>
+            <h3>Orquestrador LEIA</h3>
+            <p>Agente central que integra as demais frentes, organiza a agenda pedagógica do projeto e articula as respostas dos agentes especializados a partir de uma única base de diretrizes. Administrado diretamente pela coordenação geral.</p>
+          </div>
+          <div class="front-status">Acesso restrito à coordenação</div>
+        </div>
+        <div class="front">
+          <div class="front-main">
+            <div class="front-role">Agente pedagógico</div>
+            <h3>LEIA Escolar</h3>
+            <p>Assistente de apoio às equipes escolares na condução de práticas de leitura e escrita em sala de aula, com respostas ancoradas nos referenciais pedagógicos do projeto.</p>
+          </div>
+          <div class="front-status">Disponível no painel de acesso</div>
+        </div>
+        <div class="front">
+          <div class="front-main">
+            <div class="front-role">Em estruturação</div>
+            <h3>Site institucional</h3>
+            <p>Canal público de comunicação do projeto, com apresentação da proposta, agenda de formações e materiais abertos.</p>
+          </div>
+          <div class="front-status">Em construção</div>
+        </div>
+        <div class="front">
+          <div class="front-main">
+            <div class="front-role">Ambiente virtual</div>
+            <h3>Google Classroom</h3>
+            <p>Espaço das turmas piloto para atividades, materiais de apoio e acompanhamento das práticas de leitura.</p>
+          </div>
+          <div class="front-status"><a href="https://classroom.google.com" target="_blank" rel="noopener">Acessar Classroom ↗</a></div>
+        </div>
+        <div class="front">
+          <div class="front-main">
+            <div class="front-role">Agente de curadoria</div>
+            <h3>Bibliotecar-LEIA</h3>
+            <p>Agente voltado a bibliotecários e mediadores de leitura, com apoio à curadoria de acervo, sugestão de obras e organização de agendas de mediação.</p>
+          </div>
+          <div class="front-status">Disponível no painel de acesso</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="painel-acesso">
+    <div class="wrap">
+      <div class="eyebrow">Identificação de acesso</div>
+      <h2 class="section-title">Painel de acesso aos agentes</h2>
+      <p class="section-lead">Identifique-se com um e-mail profissional para liberar os atalhos de acesso ao LEIA Escolar e ao Bibliotecar-LEIA.</p>
+
+      <div class="access-box">
+        <div class="field">
+          <label for="nome">Nome</label>
+          <input type="text" id="nome" placeholder="Seu nome">
+        </div>
+        <div class="field">
+          <label for="email">E-mail profissional</label>
+          <input type="email" id="email" placeholder="nome@instituicao.gov.br">
+        </div>
+        <label class="consent">
+          <input type="checkbox" id="consent">
+          <span>Estou ciente de que meu nome e e-mail serão registrados para fins de controle de acesso a este painel, conforme a Lei Geral de Proteção de Dados (LGPD).</span>
+        </label>
+        <button class="unlock-btn" id="unlockBtn">Acessar os agentes</button>
+
+        <div class="agent-links" id="agentLinks">
+          <a class="agent-link" href="https://gemini.google.com/gem/14xuX3y4W21xGaYhFISjgXcrXFIOiP6RR?usp=sharing" target="_blank" rel="noopener">
+            <strong>Abrir LEIA Escolar ↗</strong>
+            <span>Agente Gemini dedicado ao apoio pedagógico escolar</span>
+          </a>
+          <a class="agent-link" href="https://gemini.google.com/gem/1Nq8IYQqvuO5wqjXlgyVrFg5RbtBQFMM_?usp=sharing" target="_blank" rel="noopener">
+            <strong>Abrir Bibliotecar-LEIA ↗</strong>
+            <span>Agente Gemini dedicado à curadoria bibliotecária</span>
+          </a>
+        </div>
+
+        <ol class="how-steps">
+          <li>Informe seu e-mail profissional. A identificação libera o acesso apenas para esta sessão, sem cadastro ou senha.</li>
+          <li>Os atalhos abrem o gerenciador de Gems do Google — confirme o login com a mesma conta que recebeu o convite de compartilhamento.</li>
+          <li>Cada agente aparece na seção "Compartilhado comigo", pronto para uso em sala de aula ou na biblioteca.</li>
+        </ol>
+
+        <p class="lgpd-note">Em conformidade com a LGPD (Lei nº 13.709/2018), o nome e o e-mail informados são registrados exclusivamente para fins de controle de acesso a este painel institucional, não são compartilhados com terceiros e podem ter sua exclusão solicitada a qualquer momento junto à coordenação do projeto.</p>
+
+        <div class="author-card">
+          <div class="avatar">LS</div>
+          <div>
+            <strong>Luciana Sales</strong>
+            <span>Autoria, arquitetura e coordenação geral</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="autoria">
+    <div class="wrap">
+      <div class="eyebrow">Autoria</div>
+      <h2 class="section-title">Um projeto de autoria individual, construído com método</h2>
+      <p>O Projeto LEIA — sua arquitetura pedagógica, o desenho dos agentes de inteligência artificial e a presente proposta de integração — é de autoria e coordenação geral de Luciana Sales, idealizado e desenvolvido de forma autônoma a partir de sua formação em Letras, Linguística e Ensino de Astronomia, e de sua atuação continuada na Educação Básica.</p>
+      <p>A concepção, a redação das diretrizes de cada agente e a integração das ferramentas apresentadas neste painel resultam de trabalho individual de pesquisa, prototipagem e curadoria técnico-pedagógica.</p>
+    </div>
+  </section>
+
+  <section id="perfil">
+    <div class="wrap">
+      <div class="eyebrow">Perfil profissional</div>
+      <h2 class="section-title">Luciana Sales</h2>
+
+      <div class="profile-grid">
+        <div class="profile-bio">
+          <p>Mestre pelo Mestrado Profissional em Ensino de Astronomia (MPEA), do Instituto de Astronomia, Geofísica e Ciências Atmosféricas (IAG) da Universidade de São Paulo (USP), concluído em 2023. Graduada em Letras, com habilitação plena em Língua Portuguesa e Inglês, pela Faculdade de Ciências Humanas de Olinda (FACHO, 2006).</p>
+          <p>Professora efetiva da Secretaria Estadual de Educação de Pernambuco (SEE-PE), concursada desde 2006 até o presente, atualmente coordenadora de biblioteca por seleção interna. Atuou como assessora pedagógica e tutora formadora de professores pela AMESP — Assessoria Municipal Especializada, organizando eventos de formação de professores das redes municipais conveniadas do Agreste Meridional de Pernambuco, do sertão pernambucano e do sertão de Alagoas. Palestrante em temas educacionais e formadora de professores da Educação Básica.</p>
+          <p>Experiência na área de Educação, com ênfase em Educação Básica, atuando principalmente nos temas de ensino de Astronomia, sustentabilidade e educação, formação de professores, linguística, interdisciplinaridade e transdisciplinaridade, currículo e avaliação. Desenvolvedora de ferramentas didático-pedagógicas para a Educação Básica.</p>
+          <div class="contact-row">
+            <a class="lattes-btn" href="http://lattes.cnpq.br/7635536460639362" target="_blank" rel="noopener">Consultar Lattes ↗</a>
+            <a class="lattes-btn" href="https://instagram.com/prof.lu_sales" target="_blank" rel="noopener">Instagram ↗</a>
+            <a class="whatsapp-btn" href="https://wa.me/5581979049653" target="_blank" rel="noopener">Falar no WhatsApp ↗</a>
+          </div>
+        </div>
+        <div class="profile-side">
+          <div class="side-block">
+            <h4>Formação acadêmica</h4>
+            <ul>
+              <li>Mestrado Profissional em Ensino de Astronomia<em>IAG · USP — concluído em 2023</em></li>
+              <li>Especialização em Linguística do Texto e do Discurso<em>FUNESO</em></li>
+              <li>Licenciatura em Letras — Português/Inglês<em>FACHO, 2006</em></li>
+            </ul>
+          </div>
+          <div class="side-block">
+            <h4>Vínculo institucional</h4>
+            <ul>
+              <li>Professora efetiva, rede estadual de ensino<em>Desde 2006</em></li>
+              <li>Coordenadora de biblioteca, seleção interna<em>SEE-PE</em></li>
+            </ul>
+          </div>
+          <div class="side-block">
+            <h4>Linhas de atuação</h4>
+            <div class="tag-row">
+              <span class="tag">Ensino de Astronomia</span>
+              <span class="tag">Formação de professores</span>
+              <span class="tag">Linguística e interdisciplinaridade</span>
+              <span class="tag">Currículo e avaliação</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p><strong>Projeto LEIA</strong></p>
+    <p>© 2026 Luciana Sales. Todos os direitos de autoria do projeto e dos agentes de inteligência artificial reservados.</p>
+    <p>Painel de caráter pedagógico-institucional, sem vínculo com identidade visual de órgãos públicos.</p>
+    <div class="footer-links">
+      <a href="https://instagram.com/prof.lu_sales" target="_blank" rel="noopener">Instagram ↗</a>
+      <a href="https://wa.me/5581979049653" target="_blank" rel="noopener">WhatsApp ↗</a>
+    </div>
+  </div>
+</footer>
+
+<script type="module">
+  import { initializeApp } from "https://cdn.jsdelivr.net/npm/firebase@10.13.0/app/+esm";
+  import { getFirestore, collection, addDoc, serverTimestamp } from "https://cdn.jsdelivr.net/npm/firebase@10.13.0/firestore/+esm";
+
+  // Configuração do app Web "Painel LEIA" no projeto leia-498520.
+  const firebaseConfig = {
+    apiKey: "AIzaSyD17RqMJROEI5QyM3TwGGxbCAiv47CwJkc",
+    authDomain: "leia-498520.firebaseapp.com",
+    projectId: "leia-498520",
+    storageBucket: "leia-498520.firebasestorage.app",
+    messagingSenderId: "515851430277",
+    appId: "1:515851430277:web:5b0769148e121fa1557cec",
+  };
+
+  let db = null;
+  try {
+    db = getFirestore(initializeApp(firebaseConfig));
+  } catch (e) {
+    console.warn("Firebase ainda não configurado nesta página:", e);
+  }
+
+  async function registrarAcesso(acao, extra) {
+    if (!db) return;
+    const nome = document.getElementById('nome').value.trim();
+    const email = document.getElementById('email').value.trim();
+    try {
+      await addDoc(collection(db, "acessos_painel"), {
+        acao,
+        nome,
+        email,
+        ...extra,
+        criadoEm: serverTimestamp(),
+        _meta: {
+          createdBy: email || "anonimo",
+          updatedBy: email || "anonimo",
+          updatedAt: new Date().toISOString(),
+        },
+      });
+    } catch (e) {
+      console.warn("Não foi possível registrar este acesso:", e);
+    }
+  }
+
+  var themeBtn = document.getElementById('themeToggle');
+  themeBtn.addEventListener('click', function () {
+    var current = document.documentElement.getAttribute('data-theme');
+    var isDark = current === 'dark' || (!current && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    themeBtn.textContent = isDark ? '🌙' : '☀️';
+  });
+
+  var btn = document.getElementById('unlockBtn');
+  var links = document.getElementById('agentLinks');
+  btn.addEventListener('click', function () {
+    var email = document.getElementById('email').value.trim();
+    var consent = document.getElementById('consent').checked;
+    if (email && consent) {
+      links.classList.add('shown');
+      links.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      registrarAcesso('identificacao');
+    } else {
+      alert('Informe um e-mail válido e confirme a ciência sobre o uso do e-mail para continuar.');
+    }
+  });
+
+  document.querySelectorAll('.agent-link').forEach(function (link) {
+    link.addEventListener('click', function () {
+      var agente = link.querySelector('strong').textContent.replace('Abrir ', '').replace(' ↗', '');
+      registrarAcesso('abrir_agente', { agente: agente });
+    });
+  });
+</script>
+</body>
+</html>
