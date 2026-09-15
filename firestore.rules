@@ -1,0 +1,22 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Deny-by-default until real collections are modeled below.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Per-collection example: require every write to stamp who made it, so
+    // the _meta audit trail (see functions/src/lib/firestoreLogger.ts)
+    // can't be bypassed by a client writing directly to Firestore.
+    //
+    // match /someCollection/{docId} {
+    //   allow create: if request.auth != null
+    //     && request.resource.data._meta.createdBy == request.auth.uid;
+    //   allow update: if request.auth != null
+    //     && request.resource.data._meta.updatedBy == request.auth.uid;
+    //   allow read, delete: if request.auth != null;
+    // }
+  }
+}
