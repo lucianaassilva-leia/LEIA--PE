@@ -25,7 +25,10 @@ service cloud.firestore {
     // e-mails coletados não ficam expostos a quem visita a página. Depois
     // de criado, o registro é imutável (sem update/delete).
     match /acessos_painel/{docId} {
-      allow read, update, delete: if false;
+      // Read is restricted to authorized coordination accounts (relatorio.html).
+      allow read: if request.auth != null
+        && request.auth.token.email in ['luciana.assilva@professor.educacao.pe.gov.br'];
+      allow update, delete: if false;
       allow create: if request.resource.data.nome is string
         && request.resource.data.nome.size() > 0
         && request.resource.data.nome.size() < 200

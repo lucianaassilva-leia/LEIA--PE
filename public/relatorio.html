@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projeto LEIA — Relatório de Acessos</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #5C2233; --navy-deep: #3E1723; --gold: #8A8D74; --gold-bright: #5C2233;
+    --paper: #F5F0E6; --paper-2: #ECE3D0; --ink: #1D1B18; --ink-soft: #6B6D60;
+    --line: rgba(92,34,51,0.18); --card-bg: #FBF8F0; --on-accent: #FBF8F0;
+  }
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {
+      --navy: #B85A78; --navy-deep: #7A2E45; --gold: #A3A68E; --gold-bright: #B85A78;
+      --paper: #17130F; --paper-2: #1F1A15; --ink: #ECE6D8; --ink-soft: #B4AFA0;
+      --line: rgba(184,90,120,0.28); --card-bg: #1D1712; --on-accent: #FBF8F0;
+    }
+  }
+  :root[data-theme="dark"] {
+    --navy: #B85A78; --navy-deep: #7A2E45; --gold: #A3A68E; --gold-bright: #B85A78;
+    --paper: #17130F; --paper-2: #1F1A15; --ink: #ECE6D8; --ink-soft: #B4AFA0;
+    --line: rgba(184,90,120,0.28); --card-bg: #1D1712; --on-accent: #FBF8F0;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; }
+  h1, h2 { font-family: 'Fraunces', Georgia, serif; margin: 0; }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  header { border-bottom: 1px solid var(--line); padding-bottom: 1.2rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+  h1 { font-size: 1.6rem; }
+  .eyebrow { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--navy); font-weight: 700; margin-bottom: 0.4rem; }
+
+  #gate { text-align: center; padding: 4rem 1rem; }
+  #gate p { color: var(--ink-soft); max-width: 46ch; margin: 0.8rem auto 1.6rem; }
+  .btn { background: var(--navy); color: var(--on-accent); border: none; padding: 0.75rem 1.4rem; border-radius: 4px; font-weight: 600; font-size: 0.92rem; cursor: pointer; text-decoration: none; display: inline-block; }
+  .btn-secondary { border: 1px solid var(--navy); color: var(--navy); background: none; padding: 0.6rem 1.1rem; border-radius: 3px; font-weight: 600; font-size: 0.85rem; cursor: pointer; }
+
+  #app { display: none; }
+  #app.shown { display: block; }
+  .stats-row { display: flex; flex-wrap: wrap; gap: 1px; background: var(--line); border: 1px solid var(--line); margin-bottom: 2rem; }
+  .stat { flex: 1 1 160px; background: var(--card-bg); padding: 1.1rem 1.3rem; }
+  .stat .num { font-family: 'Fraunces', serif; font-size: 1.8rem; color: var(--navy); }
+  .stat .label { font-size: 0.78rem; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; }
+
+  .toolbar { display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: center; margin-bottom: 1.2rem; }
+  .toolbar input { flex: 1 1 220px; padding: 0.55rem 0.8rem; border: 1px solid var(--line); border-radius: 3px; background: var(--card-bg); color: var(--ink); font-family: inherit; font-size: 0.9rem; }
+
+  table { width: 100%; border-collapse: collapse; background: var(--card-bg); border: 1px solid var(--line); font-size: 0.88rem; }
+  th, td { text-align: left; padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--line); }
+  th { font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--gold); font-weight: 700; }
+  tbody tr:hover { background: var(--paper-2); }
+  #empty { color: var(--ink-soft); padding: 2rem 0; text-align: center; }
+  #loading { color: var(--ink-soft); padding: 2rem 0; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">Área restrita · Projeto LEIA</div>
+      <h1>Relatório de acessos ao painel</h1>
+    </div>
+    <div id="headerActions"></div>
+  </header>
+
+  <div id="gate">
+    <p>Esta página mostra quem acessou o painel do Projeto LEIA e quais agentes abriu — use como evidência de uso. Entre com a conta institucional autorizada para ver os dados.</p>
+    <button class="btn" id="loginBtn">Entrar com Google</button>
+    <p id="gateError" style="color:#b33; display:none; margin-top:1rem;"></p>
+  </div>
+
+  <div id="app">
+    <div class="stats-row" id="statsRow"></div>
+    <div class="toolbar">
+      <input type="text" id="filterInput" placeholder="Filtrar por nome ou e-mail...">
+      <button class="btn-secondary" id="exportBtn">Exportar CSV</button>
+      <button class="btn-secondary" id="logoutBtn">Sair</button>
+    </div>
+    <div id="loading">Carregando registros...</div>
+    <div id="empty" style="display:none;">Nenhum acesso registrado ainda.</div>
+    <table id="table" style="display:none;">
+      <thead>
+        <tr><th>Data/hora</th><th>Nome</th><th>E-mail</th><th>Ação</th><th>Agente</th></tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://cdn.jsdelivr.net/npm/firebase@10.13.0/app/+esm";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://cdn.jsdelivr.net/npm/firebase@10.13.0/auth/+esm";
+  import { getFirestore, collection, getDocs, query, orderBy } from "https://cdn.jsdelivr.net/npm/firebase@10.13.0/firestore/+esm";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyD17RqMJROEI5QyM3TwGGxbCAiv47CwJkc",
+    authDomain: "leia-498520.firebaseapp.com",
+    projectId: "leia-498520",
+    storageBucket: "leia-498520.firebasestorage.app",
+    messagingSenderId: "515851430277",
+    appId: "1:515851430277:web:5b0769148e121fa1557cec",
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const provider = new GoogleAuthProvider();
+
+  const gate = document.getElementById('gate');
+  const appEl = document.getElementById('app');
+  const gateError = document.getElementById('gateError');
+  let allRows = [];
+
+  document.getElementById('loginBtn').addEventListener('click', async () => {
+    gateError.style.display = 'none';
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (e) {
+      gateError.textContent = 'Não foi possível entrar: ' + e.message;
+      gateError.style.display = 'block';
+    }
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      gate.style.display = 'block';
+      appEl.classList.remove('shown');
+      return;
+    }
+    gate.style.display = 'none';
+    appEl.classList.add('shown');
+    await loadData();
+  });
+
+  async function loadData() {
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('table').style.display = 'none';
+    document.getElementById('empty').style.display = 'none';
+    try {
+      const q = query(collection(db, 'acessos_painel'), orderBy('criadoEm', 'desc'));
+      const snap = await getDocs(q);
+      allRows = snap.docs.map((d) => {
+        const data = d.data();
+        return {
+          data: data.criadoEm ? data.criadoEm.toDate() : null,
+          nome: data.nome || '',
+          email: data.email || '',
+          acao: data.acao || '',
+          agente: data.agente || '—',
+        };
+      });
+      renderStats(allRows);
+      renderTable(allRows);
+    } catch (e) {
+      gate.style.display = 'block';
+      appEl.classList.remove('shown');
+      gateError.textContent = 'Sua conta não tem permissão para ver esses dados: ' + e.message;
+      gateError.style.display = 'block';
+    } finally {
+      document.getElementById('loading').style.display = 'none';
+    }
+  }
+
+  function renderStats(rows) {
+    const totalAcessos = rows.length;
+    const pessoasUnicas = new Set(rows.map((r) => r.email.toLowerCase())).size;
+    const porAgente = {};
+    rows.forEach((r) => {
+      if (r.acao === 'abrir_agente') porAgente[r.agente] = (porAgente[r.agente] || 0) + 1;
+    });
+    const statsRow = document.getElementById('statsRow');
+    statsRow.innerHTML = '';
+    const stats = [
+      { num: totalAcessos, label: 'Registros totais' },
+      { num: pessoasUnicas, label: 'Pessoas únicas' },
+      ...Object.entries(porAgente).map(([nome, n]) => ({ num: n, label: nome })),
+    ];
+    stats.forEach((s) => {
+      const div = document.createElement('div');
+      div.className = 'stat';
+      div.innerHTML = `<div class="num">${s.num}</div><div class="label">${s.label}</div>`;
+      statsRow.appendChild(div);
+    });
+  }
+
+  function renderTable(rows) {
+    const tbody = document.getElementById('tbody');
+    tbody.innerHTML = '';
+    if (rows.length === 0) {
+      document.getElementById('empty').style.display = 'block';
+      document.getElementById('table').style.display = 'none';
+      return;
+    }
+    document.getElementById('empty').style.display = 'none';
+    document.getElementById('table').style.display = 'table';
+    rows.forEach((r) => {
+      const tr = document.createElement('tr');
+      const dataStr = r.data ? r.data.toLocaleString('pt-BR') : '—';
+      tr.innerHTML = `<td>${dataStr}</td><td>${escapeHtml(r.nome)}</td><td>${escapeHtml(r.email)}</td><td>${escapeHtml(r.acao)}</td><td>${escapeHtml(r.agente)}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  document.getElementById('filterInput').addEventListener('input', (e) => {
+    const term = e.target.value.trim().toLowerCase();
+    const filtered = term
+      ? allRows.filter((r) => r.nome.toLowerCase().includes(term) || r.email.toLowerCase().includes(term))
+      : allRows;
+    renderTable(filtered);
+  });
+
+  document.getElementById('exportBtn').addEventListener('click', () => {
+    const header = ['Data/hora', 'Nome', 'E-mail', 'Ação', 'Agente'];
+    const lines = [header.join(';')];
+    allRows.forEach((r) => {
+      const dataStr = r.data ? r.data.toLocaleString('pt-BR') : '';
+      lines.push([dataStr, r.nome, r.email, r.acao, r.agente].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(';'));
+    });
+    const blob = new Blob(['﻿' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `acessos-leia-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+</script>
+</body>
+</html>
