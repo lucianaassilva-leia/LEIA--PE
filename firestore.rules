@@ -18,5 +18,20 @@ service cloud.firestore {
     //     && request.resource.data._meta.updatedBy == request.auth.uid;
     //   allow read, delete: if request.auth != null;
     // }
+
+    // Painel institucional (página pública, sem login): registra quem se
+    // identificou e qual agente abriu. Escrita permitida a qualquer
+    // visitante (é um formulário público), mas nunca leitura — os nomes e
+    // e-mails coletados não ficam expostos a quem visita a página. Depois
+    // de criado, o registro é imutável (sem update/delete).
+    match /acessos_painel/{docId} {
+      allow read, update, delete: if false;
+      allow create: if request.resource.data.nome is string
+        && request.resource.data.nome.size() > 0
+        && request.resource.data.nome.size() < 200
+        && request.resource.data.email is string
+        && request.resource.data.email.matches('^[^@\\s]+@[^@\\s]+[.][^@\\s]+$')
+        && request.resource.data.acao in ['identificacao', 'abrir_agente'];
+    }
   }
 }
